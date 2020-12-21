@@ -1,10 +1,11 @@
 ﻿using System;
 using Newtonsoft.Json.Linq;
+using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Entities.Auditing;
 
 namespace Volo.Abp.WorkFlowManagement
 {
-    public class ActivityInstance:FullAuditedAggregateRoot<Guid>
+    public class ActivityInstance:Entity<Guid>
     {
         public Guid ActivityId { get; set; }
         public WorkflowInstance WorkflowInstance { get; set; }

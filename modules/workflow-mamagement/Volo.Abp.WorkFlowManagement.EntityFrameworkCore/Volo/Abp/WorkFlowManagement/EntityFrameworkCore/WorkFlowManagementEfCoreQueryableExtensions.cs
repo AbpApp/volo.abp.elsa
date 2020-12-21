@@ -18,6 +18,18 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
                 .Include(x => x.Activities)
                 .Include(x => x.Connections);
         }
+        public static IQueryable<WorkflowInstance> IncludeDetails(this IQueryable<WorkflowInstance> queryable, bool include = true)
+        {
+            if (!include)
+            {
+                return queryable;
+            }
+
+            return queryable
+                .AsSplitQuery()
+                .Include(x => x.Activities)
+                .Include(x => x.BlockingActivities);
+        }
         public static IQueryable<WorkflowDefinitionVersion> WithVersion(
             this IQueryable<WorkflowDefinitionVersion> query,
             VersionOptions version)

@@ -22,4 +22,8 @@
     <Content Remove="Volo\Abp\WorkFlowManagement\Localization\WorkFlowManagement\*.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\framework\Volo.Abp.Elsa\Volo.Abp.Elsa.csproj" />
+  </ItemGroup>
+
 </Project>

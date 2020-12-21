@@ -9,7 +9,7 @@ namespace Volo.Abp.WorkFlowManagement
     public class WorkflowInstance:FullAuditedAggregateRoot<Guid>
     {
 
-        public Guid InstanceId { get; set; }
+        public string InstanceId { get; set; }
         public string DefinitionId { get; set; }
         public int Version { get; set; }
         public WorkflowStatus Status { get; set; }

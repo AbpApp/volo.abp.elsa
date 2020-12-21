@@ -17,6 +17,11 @@ namespace Volo.Abp.Elsa
         typeof(AbpTimingModule))]
     public class AbpElsaModule : AbpModule
     {
+        public override void ConfigureServices(ServiceConfigurationContext context)
+        {
+            context.Services.AddSingleton<IActivityManager, ActivityManager>();
+
+        }
         public override void PreConfigureServices(ServiceConfigurationContext context)
         {
             AutoAddWorkFlowDefinitions(context.Services);

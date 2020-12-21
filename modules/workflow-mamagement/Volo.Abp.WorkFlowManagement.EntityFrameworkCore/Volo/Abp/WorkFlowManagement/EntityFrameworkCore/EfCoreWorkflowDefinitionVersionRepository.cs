@@ -17,9 +17,29 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
         {
         }
 
-        public async Task<WorkflowDefinitionVersion> GetByVersionIdAsync(string versionId, CancellationToken cancellationToken=default)
+        public void BatchDeleteWorkflowDefinitionVersions(List<WorkflowDefinitionVersion> definitions)
         {
-            return await DbSet.FirstOrDefaultAsync(t => t.VersionId == versionId, cancellationToken);
+            DbSet.RemoveRange(definitions);
+        }
+
+        public void BatchDeleteConnectionDefinitions(List<ConnectionDefinition> connectionDefinitions)
+        {
+            DbContext.Set<ConnectionDefinition>().RemoveRange(connectionDefinitions);
+        }
+
+        public Task<List<ConnectionDefinition>> GetConnectionDefinitionListByWorkFlowInstanceDefinitionIdAsync(string id,
+            CancellationToken cancellationToken = default)
+        {
+            return DbContext.Set<ConnectionDefinition>()
+                .Include(t=>t.WorkflowDefinitionVersion)
+                .Where(t => t.WorkflowDefinitionVersion.DefinitionId == id)
+                .ToListAsync(cancellationToken);
+        }
+        
+
+        public async Task<WorkflowDefinitionVersion> GetByVersionIdAsync(string versionId, bool includeDetails = false,CancellationToken cancellationToken=default)
+        {
+            return await DbSet.IncludeDetails(includeDetails).FirstOrDefaultAsync(t => t.VersionId == versionId, cancellationToken);
         }
 
         public async Task<List<WorkflowDefinitionVersion>> GetListAsync(string sorting = null, int maxResultCount = 2147483647, int skipCount = 0, string filter = null,

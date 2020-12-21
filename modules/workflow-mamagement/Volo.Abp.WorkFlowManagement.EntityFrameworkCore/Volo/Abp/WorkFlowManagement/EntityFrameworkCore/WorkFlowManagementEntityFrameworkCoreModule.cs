@@ -14,9 +14,10 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
         {
             context.Services.AddAbpDbContext<WorkFlowManagementDbContext>(options =>
             {
-                /* Add custom repositories here. Example:
-                 * options.AddRepository<Question, EfCoreQuestionRepository>();
-                 */
+                options.AddRepository<WorkflowInstance, EfCoreWorkflowInstanceRepository>();
+                options.AddRepository<WorkflowDefinitionVersion, EfCoreWorkflowDefinitionVersionRepository>();
+                options.AddRepository<ActivityDefinition, EfCoreActivityDefinitionRepository>();
+                options.AddRepository<ActivityInstance, EfCoreActivityInstanceRepository>();
             });
         }
     }

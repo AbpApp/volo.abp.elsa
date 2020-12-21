@@ -25,7 +25,7 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
             optionsAction?.Invoke(options);
             builder.Entity<WorkflowDefinitionVersion>(options =>
             {
-                options.ConfigureFullAudited();
+                options.ConfigureFullAuditedAggregateRoot();
                 options.Property(x => x.DefinitionId);
                 options.HasMany(x => x.Activities).WithOne(x => x.WorkflowDefinitionVersion);
                 options.HasMany(x => x.Connections).WithOne(x => x.WorkflowDefinitionVersion);
@@ -33,7 +33,7 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
             });
             builder.Entity<WorkflowInstance>(options =>
             {
-                options.ConfigureFullAudited();
+                options.ConfigureFullAuditedAggregateRoot();
                 options.Property(x => x.Status).HasConversion<string>();
                 options
                     .Property(x => x.Scope)
@@ -71,6 +71,7 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
             });
             builder.Entity<ActivityDefinition>(options =>
             {
+                options.ConfigureByConvention();
                 options
                     .Property(x => x.State)
                     .HasConversion(x => Serialize(x), x => Deserialize<JObject>(x));

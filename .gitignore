@@ -251,10 +251,5 @@ paket-files/
 .idea/
 *.sln.iml
 
-# Dppc
-src/Uiit.Dppc.Web/Logs/*
-src/Uiit.Dppc.Web.Host/Logs/*
-src/Uiit.Dppc.IdentityServer/Logs/*
-src/Uiit.Dppc.HttpApi.Host/Logs/*
-src/Uiit.Dppc.HttpApi.Host/Logs/*
-src/Uiit.Dppc.DbMigrator/Logs/*
+# example
+example

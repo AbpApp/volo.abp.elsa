@@ -9,7 +9,19 @@ namespace Volo.Abp.WorkFlowManagement
 {
     public interface IWorkflowDefinitionVersionRepository: IBasicRepository<WorkflowDefinitionVersion, Guid>
     {
-        Task<WorkflowDefinitionVersion> GetByVersionIdAsync(string versionId,CancellationToken cancellationToken=default);
+        void BatchDeleteWorkflowDefinitionVersions(
+            List<WorkflowDefinitionVersion> definitions
+        );
+        void BatchDeleteConnectionDefinitions(
+            List<ConnectionDefinition> connectionDefinitions
+        );
+        Task<List<ConnectionDefinition>> GetConnectionDefinitionListByWorkFlowInstanceDefinitionIdAsync(
+            string id,
+            CancellationToken cancellationToken=default);
+        Task<WorkflowDefinitionVersion> GetByVersionIdAsync(
+            string versionId,
+            bool includeDetails = false,
+            CancellationToken cancellationToken=default);
         Task<List<WorkflowDefinitionVersion>> GetListAsync(
             string sorting = null,
             int maxResultCount = int.MaxValue,
