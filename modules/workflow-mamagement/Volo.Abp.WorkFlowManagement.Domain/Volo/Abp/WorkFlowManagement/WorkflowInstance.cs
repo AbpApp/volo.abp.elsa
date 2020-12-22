@@ -6,7 +6,7 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace Volo.Abp.WorkFlowManagement
 {
-    public class WorkflowInstance:FullAuditedAggregateRoot<Guid>
+    public class WorkflowInstance:FullAuditedAggregateRoot<string>
     {
 
         public string InstanceId { get; set; }

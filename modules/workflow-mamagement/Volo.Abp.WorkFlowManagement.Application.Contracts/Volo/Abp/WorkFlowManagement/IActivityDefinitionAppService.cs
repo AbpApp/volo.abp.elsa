@@ -9,6 +9,6 @@ namespace Volo.Abp.WorkFlowManagement
 {
     public interface IActivityDefinitionAppService: IApplicationService
     {
-        ActivityDescriptor[] GetActivityDescriptors();
+        List<ActivityDescriptorDto> GetActivityDescriptors();
     }
 }

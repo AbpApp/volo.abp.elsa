@@ -11,7 +11,7 @@ using Volo.Abp.EntityFrameworkCore;
 
 namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
 {
-    public class EfCoreWorkflowDefinitionVersionRepository:EfCoreRepository<IWorkFlowManagementDbContext, WorkflowDefinitionVersion, Guid>, IWorkflowDefinitionVersionRepository
+    public class EfCoreWorkflowDefinitionVersionRepository:EfCoreRepository<IWorkFlowManagementDbContext, WorkflowDefinitionVersion, string>, IWorkflowDefinitionVersionRepository
     {
         public EfCoreWorkflowDefinitionVersionRepository(IDbContextProvider<IWorkFlowManagementDbContext> dbContextProvider) : base(dbContextProvider)
         {
@@ -39,7 +39,7 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
 
         public async Task<WorkflowDefinitionVersion> GetByVersionIdAsync(string versionId, bool includeDetails = false,CancellationToken cancellationToken=default)
         {
-            return await DbSet.IncludeDetails(includeDetails).FirstOrDefaultAsync(t => t.VersionId == versionId, cancellationToken);
+            return await DbSet.IncludeDetails(includeDetails).FirstOrDefaultAsync(t => t.Id == versionId, cancellationToken);
         }
 
         public async Task<List<WorkflowDefinitionVersion>> GetListAsync(string sorting = null, int maxResultCount = 2147483647, int skipCount = 0, string filter = null,
@@ -60,7 +60,7 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
         {
             return await DbSet
                 .IncludeDetails(includeDetails)
-                .Where(t=>t.VersionId==id)
+                .Where(t=>t.Id==id)
                 .WithVersion(version)
                 .ToListAsync(GetCancellationToken(cancellationToken));
         }

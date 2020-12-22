@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Elsa.Metadata;
 
 namespace Volo.Abp.WorkFlowManagement
 {
@@ -9,6 +10,8 @@ namespace Volo.Abp.WorkFlowManagement
             /* You can configure your AutoMapper mapping configuration here.
              * Alternatively, you can split your mapping configurations
              * into multiple profile classes for a better organization. */
+            CreateMap<ActivityDescriptor, ActivityDescriptorDto>()
+                .ForMember(t=>t.Id,option=>option.Ignore());
         }
     }
 }

@@ -1,13 +1,27 @@
 ﻿using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Entities.Auditing;
 
 namespace Volo.Abp.WorkFlowManagement
 {
-    public class ActivityDefinition:Entity<Guid>
+    public class ActivityDefinition:Entity<string>
     {
-        public string ActivityId { get; set; }
+        public ActivityDefinition()
+        {
+            State = new JObject();
+        }
+    
+        public ActivityDefinition(string id, string type, Dictionary<string,object> state, int left = 0, int top = 0)
+        {
+            Id = id;
+            Type = type;
+            Left = left;
+            State = JObject.Parse(JsonConvert.SerializeObject(state));
+            Top = top;
+        }
         public WorkflowDefinitionVersion WorkflowDefinitionVersion { get; set; }
         public string Type { get; set; }
         public string Name { get; set; }

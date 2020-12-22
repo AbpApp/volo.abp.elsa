@@ -23,77 +23,85 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
             );
 
             optionsAction?.Invoke(options);
-            builder.Entity<WorkflowDefinitionVersion>(options =>
+            builder.Entity<WorkflowDefinitionVersion>(b =>
             {
-                options.ConfigureFullAuditedAggregateRoot();
-                options.Property(x => x.DefinitionId);
-                options.HasMany(x => x.Activities).WithOne(x => x.WorkflowDefinitionVersion);
-                options.HasMany(x => x.Connections).WithOne(x => x.WorkflowDefinitionVersion);
-                options.Property(x => x.Variables).HasConversion(x => Serialize(x), x => Deserialize<Variables>(x));
+                b.ToTable(options.TablePrefix + "WorkflowDefinitionVersions", options.Schema);
+                b.ConfigureFullAuditedAggregateRoot();
+                b.Property(x => x.DefinitionId);
+                b.HasMany(x => x.Activities).WithOne(x => x.WorkflowDefinitionVersion);
+                b.HasMany(x => x.Connections).WithOne(x => x.WorkflowDefinitionVersion);
+                b.Property(x => x.Variables).HasConversion(x => Serialize(x), x => Deserialize<Variables>(x));
             });
-            builder.Entity<WorkflowInstance>(options =>
+            builder.Entity<WorkflowInstance>(b =>
             {
-                options.ConfigureFullAuditedAggregateRoot();
-                options.Property(x => x.Status).HasConversion<string>();
-                options
+                b.ToTable(options.TablePrefix + "WorkflowInstances", options.Schema);
+                b.ConfigureFullAuditedAggregateRoot();
+                b.Property(x => x.Status).HasConversion<string>();
+                b
                     .Property(x => x.Scope)
                     .HasConversion(
                         x => Serialize(x),
                         x => Deserialize<WorkflowExecutionScope>(x)
                     );
-                options
+                b
                     .Property(x => x.ExecutionLog)
                     .HasConversion(
                         x => Serialize(x),
                         x => Deserialize<ICollection<LogEntry>>(x)
                     );
 
-                options
+                b
                     .Property(x => x.Fault)
                     .HasConversion(
                         x => Serialize(x),
                         x => Deserialize<WorkflowFault>(x)
                     );
 
-                options
+                b
                     .Property(x => x.Input)
                     .HasConversion(
                         x => Serialize(x),
                         x => Deserialize<Variables>(x)
                     );
-                options
+                b
                     .HasMany(x => x.Activities)
                     .WithOne(x => x.WorkflowInstance);
             
-                options
+                b
                     .HasMany(x => x.BlockingActivities)
                     .WithOne(x => x.WorkflowInstance);
             });
-            builder.Entity<ActivityDefinition>(options =>
+            builder.Entity<ActivityDefinition>(b =>
             {
-                options.ConfigureByConvention();
-                options
+                b.ToTable(options.TablePrefix + "ActivityDefinitions", options.Schema);
+                b.ConfigureByConvention();
+                b
                     .Property(x => x.State)
                     .HasConversion(x => Serialize(x), x => Deserialize<JObject>(x));
             });
-            builder.Entity<ConnectionDefinition>(options =>
+            builder.Entity<ConnectionDefinition>(b =>
             {
-                options.ConfigureByConvention();
+                b.ToTable(options.TablePrefix + "ConnectionDefinitions", options.Schema);
+                b.HasKey(c => new { c.DestinationActivityId, c.SourceActivityId });
+                b.HasIndex(c => new  { c.DestinationActivityId, c.SourceActivityId });
+
             });
-            builder.Entity<ActivityInstance>(options =>
+            builder.Entity<ActivityInstance>(b =>
             {
-                options.ConfigureByConvention();
-                options
+                b.ToTable(options.TablePrefix + "ActivityInstances", options.Schema);
+                b.ConfigureByConvention();
+                b
                     .Property(x => x.State)
                     .HasConversion(x => Serialize(x), x => Deserialize<JObject>(x));
-                options
+                b
                     .Property(x => x.Output)
                     .HasConversion(x => Serialize(x), x => Deserialize<JObject>(x));
             });
-            builder.Entity<BlockingActivity>(options =>
+            builder.Entity<BlockingActivity>(b =>
             {
-                options.ConfigureByConvention();
-                options.HasKey(x => x.Id);
+                b.ToTable(options.TablePrefix + "BlockingActivitys", options.Schema);
+                b.ConfigureByConvention();
+                b.HasKey(x => x.Id);
             });
         }
         private static string Serialize(object value)

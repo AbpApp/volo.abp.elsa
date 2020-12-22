@@ -9,6 +9,10 @@ namespace Volo.Abp.WorkFlowManagement
 {
     public interface IWorkflowDefinitionAppService : IApplicationService
     {
+        Task CreateAsync(WorkflowDefinitionCreateDto input);
+        
+        Task<List<WorkflowDefinitionListDto>> GetListAsync();
 
+        Task DeleteAsync(string id);
     }
 }

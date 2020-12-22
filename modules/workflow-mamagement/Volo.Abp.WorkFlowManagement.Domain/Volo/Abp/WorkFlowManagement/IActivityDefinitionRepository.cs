@@ -6,7 +6,7 @@ using Volo.Abp.Domain.Repositories;
 
 namespace Volo.Abp.WorkFlowManagement
 {
-    public interface IActivityDefinitionRepository:IBasicRepository<ActivityDefinition, Guid>
+    public interface IActivityDefinitionRepository:IBasicRepository<ActivityDefinition, string>
     {
         void BatchDeleteActivityDefinitions(
             List<ActivityDefinition> definitions

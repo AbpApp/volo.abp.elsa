@@ -5,9 +5,9 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace Volo.Abp.WorkFlowManagement
 {
-    public class ActivityInstance:Entity<Guid>
+    public class ActivityInstance:Entity<string>
     {
-        public Guid ActivityId { get; set; }
+        public string ActivityId { get; set; }
         public WorkflowInstance WorkflowInstance { get; set; }
         public string Type { get; set; }
         public JObject State { get; set; }

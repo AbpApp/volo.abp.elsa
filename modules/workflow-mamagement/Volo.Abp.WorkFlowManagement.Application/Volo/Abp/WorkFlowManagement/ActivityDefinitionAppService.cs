@@ -16,9 +16,14 @@ namespace Volo.Abp.WorkFlowManagement
         {
             _activityManager = activityManager;
         }
-        public ActivityDescriptor[] GetActivityDescriptors()
+        public List<ActivityDescriptorDto> GetActivityDescriptors()
         {
-            return _activityManager.GetActivityDefinitionList().ToArray();
+           return _activityManager.GetActivityDefinitionList().Select(item =>
+            {
+                var dto = ObjectMapper.Map<ActivityDescriptor, ActivityDescriptorDto>(item);
+                dto.Id = GuidGenerator.Create();
+                return dto;
+            }).ToList();
         }
     }
 }

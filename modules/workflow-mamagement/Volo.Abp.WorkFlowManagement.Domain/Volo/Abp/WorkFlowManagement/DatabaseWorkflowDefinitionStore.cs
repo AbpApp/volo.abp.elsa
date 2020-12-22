@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Elsa.Models;
 using Elsa.Persistence;
+using Volo.Abp.Guids;
 using Volo.Abp.ObjectMapping;
 using Volo.Abp.Uow;
 
@@ -18,7 +20,8 @@ namespace Volo.Abp.WorkFlowManagement
         private readonly IActivityDefinitionRepository _activityDefinitionRepository;
         private readonly IActivityInstanceRepository _activityInstanceRepository;
         private readonly IWorkflowInstanceRepository _workflowInstanceRepository;
-        public DatabaseWorkflowDefinitionStore(IWorkflowDefinitionVersionRepository workflowDefinitionVersionRepository, IObjectMapper<WorkFlowManagementDomainModule> objectMapper, IActivityDefinitionRepository activityDefinitionRepository, IWorkflowInstanceRepository workflowInstanceRepository, IActivityInstanceRepository activityInstanceRepository, IUnitOfWorkManager unitOfWorkManager)
+        private readonly IGuidGenerator _guidGenerator;
+        public DatabaseWorkflowDefinitionStore(IWorkflowDefinitionVersionRepository workflowDefinitionVersionRepository, IObjectMapper<WorkFlowManagementDomainModule> objectMapper, IActivityDefinitionRepository activityDefinitionRepository, IWorkflowInstanceRepository workflowInstanceRepository, IActivityInstanceRepository activityInstanceRepository, IUnitOfWorkManager unitOfWorkManager, IGuidGenerator guidGenerator)
         {
             _workflowDefinitionVersionRepository = workflowDefinitionVersionRepository;
             _objectMapper = objectMapper;
@@ -26,6 +29,7 @@ namespace Volo.Abp.WorkFlowManagement
             _workflowInstanceRepository = workflowInstanceRepository;
             _activityInstanceRepository = activityInstanceRepository;
             _unitOfWorkManager = unitOfWorkManager;
+            _guidGenerator = guidGenerator;
         }
         
         public async Task<global::Elsa.Models.WorkflowDefinitionVersion> SaveAsync(global::Elsa.Models.WorkflowDefinitionVersion definition, CancellationToken cancellationToken = default)
@@ -41,7 +45,8 @@ namespace Volo.Abp.WorkFlowManagement
         public  async  Task<global::Elsa.Models.WorkflowDefinitionVersion> AddAsync(global::Elsa.Models.WorkflowDefinitionVersion definition, CancellationToken cancellationToken = default)
         {
             var entity = Map(definition);
-            await _workflowDefinitionVersionRepository.InsertAsync(entity, true,cancellationToken);
+
+            await _workflowDefinitionVersionRepository.InsertAsync(entity);
             await _unitOfWorkManager.Current.SaveChangesAsync(cancellationToken);
             return Map(entity);
         }
@@ -56,7 +61,7 @@ namespace Volo.Abp.WorkFlowManagement
 
         public  async Task<IEnumerable<global::Elsa.Models.WorkflowDefinitionVersion>> ListAsync(VersionOptions version, CancellationToken cancellationToken = default)
         {
-            var lists = await _workflowDefinitionVersionRepository.GetListAsync();
+            var lists = await _workflowDefinitionVersionRepository.GetListAsync(includeDetails:true);
             return _objectMapper.Map<IEnumerable<WorkflowDefinitionVersion>,IEnumerable<global::Elsa.Models.WorkflowDefinitionVersion>>(lists.AsEnumerable());
         }
         [UnitOfWork]

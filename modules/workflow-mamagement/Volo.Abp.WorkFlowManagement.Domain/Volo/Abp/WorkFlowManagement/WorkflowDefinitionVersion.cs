@@ -5,9 +5,34 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace Volo.Abp.WorkFlowManagement
 {
-    public class WorkflowDefinitionVersion:FullAuditedAggregateRoot<Guid>
+    public class WorkflowDefinitionVersion:FullAuditedAggregateRoot<string>
     {
-        public string VersionId { get; set; }
+        public WorkflowDefinitionVersion()
+        {
+            Activities = new List<ActivityDefinition>();
+            Connections = new List<ConnectionDefinition>();
+            Variables = new Variables();
+        }
+        
+
+        public WorkflowDefinitionVersion(string id)
+        {
+            Id = id;
+            Activities = new List<ActivityDefinition>();
+            Connections = new List<ConnectionDefinition>();
+            Variables = new Variables();
+        }
+        public WorkflowDefinitionVersion(string id,string name,string description,bool isSingleton,bool isDisabled)
+        {
+            Id = id;
+            Name = name;
+            Description = description;
+            IsSingleton = isSingleton;
+            IsDisabled = isDisabled;
+            Activities = new List<ActivityDefinition>();
+            Connections = new List<ConnectionDefinition>();
+            Variables = new Variables();
+        }
         public string DefinitionId { get; set; }
         public int Version { get; set; }
         public string Name { get; set; }

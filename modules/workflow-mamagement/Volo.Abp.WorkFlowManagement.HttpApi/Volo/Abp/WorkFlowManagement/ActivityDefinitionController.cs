@@ -21,7 +21,7 @@ namespace Volo.Abp.WorkFlowManagement
             _activityDefinitionAppService = activityDefinitionAppService;
         }
         [HttpGet]
-        public ActivityDescriptor[] GetActivityDescriptors()
+        public List<ActivityDescriptorDto> GetActivityDescriptors()
         {
            return _activityDefinitionAppService.GetActivityDescriptors();
         }

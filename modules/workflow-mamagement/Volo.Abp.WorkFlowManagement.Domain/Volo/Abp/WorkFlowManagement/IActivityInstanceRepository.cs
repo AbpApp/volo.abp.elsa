@@ -6,7 +6,7 @@ using Volo.Abp.Domain.Repositories;
 
 namespace Volo.Abp.WorkFlowManagement
 {
-    public interface IActivityInstanceRepository:IBasicRepository<ActivityInstance, Guid>
+    public interface IActivityInstanceRepository:IBasicRepository<ActivityInstance, string>
     {
         void BatchDeleteActivityInstances(
             List<ActivityInstance> instances

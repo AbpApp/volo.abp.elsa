@@ -7,7 +7,7 @@ using Volo.Abp.Domain.Repositories;
 
 namespace Volo.Abp.WorkFlowManagement
 {
-    public interface IWorkflowInstanceRepository: IBasicRepository<WorkflowInstance, Guid>
+    public interface IWorkflowInstanceRepository: IBasicRepository<WorkflowInstance, string>
     {
         void BatchDeleteWorkflowInstances(
             List<WorkflowInstance> instances);

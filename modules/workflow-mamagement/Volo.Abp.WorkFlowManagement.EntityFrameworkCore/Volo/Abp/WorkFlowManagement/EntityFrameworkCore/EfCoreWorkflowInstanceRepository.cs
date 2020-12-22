@@ -10,7 +10,7 @@ using Volo.Abp.EntityFrameworkCore;
 
 namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
 {
-    public class EfCoreWorkflowInstanceRepository : EfCoreRepository<IWorkFlowManagementDbContext, WorkflowInstance, Guid>, IWorkflowInstanceRepository
+    public class EfCoreWorkflowInstanceRepository : EfCoreRepository<IWorkFlowManagementDbContext, WorkflowInstance, string>, IWorkflowInstanceRepository
     {
         public EfCoreWorkflowInstanceRepository(IDbContextProvider<IWorkFlowManagementDbContext> dbContextProvider) : base(dbContextProvider)
         {

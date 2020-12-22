@@ -7,7 +7,7 @@ using Volo.Abp.Domain.Repositories;
 
 namespace Volo.Abp.WorkFlowManagement
 {
-    public interface IWorkflowDefinitionVersionRepository: IBasicRepository<WorkflowDefinitionVersion, Guid>
+    public interface IWorkflowDefinitionVersionRepository: IBasicRepository<WorkflowDefinitionVersion, string>
     {
         void BatchDeleteWorkflowDefinitionVersions(
             List<WorkflowDefinitionVersion> definitions
