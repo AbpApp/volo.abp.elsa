@@ -30,6 +30,10 @@ namespace Volo.Abp.WorkFlowManagement
             bool includeDetails = false,
             CancellationToken cancellationToken = default
         );
+        Task<WorkflowDefinitionVersion> GetByIdAsync(
+            string id, 
+            bool includeDetails = false,
+            CancellationToken cancellationToken = default);
         Task<List<WorkflowDefinitionVersion>> GetListByDefinitionIdAndVersionAsync(
             string id ,
             VersionOptions version,

@@ -45,8 +45,7 @@ namespace Volo.Abp.WorkFlowManagement
         public  async  Task<global::Elsa.Models.WorkflowDefinitionVersion> AddAsync(global::Elsa.Models.WorkflowDefinitionVersion definition, CancellationToken cancellationToken = default)
         {
             var entity = Map(definition);
-
-            await _workflowDefinitionVersionRepository.InsertAsync(entity);
+            await _workflowDefinitionVersionRepository.InsertAsync(entity, cancellationToken: cancellationToken);
             await _unitOfWorkManager.Current.SaveChangesAsync(cancellationToken);
             return Map(entity);
         }

@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Volo.Abp.WorkFlowManagement
 {
+    [RemoteService]
+    [Area("Workflor-Management")]
+    [ControllerName("WorkflowDefinition")]
+    [Route("api/workflow-management/workflowDefinition")]
     public class WorkflowDefinitionController : WorkFlowManagementController, IWorkflowDefinitionAppService
     {
         private readonly IWorkflowDefinitionAppService _workflowDefinitionAppService;
@@ -24,11 +28,23 @@ namespace Volo.Abp.WorkFlowManagement
         {
             return _workflowDefinitionAppService.DeleteAsync(id);
         }
+        [HttpGet]
+        [Route("{id}")]
+        public virtual Task<WorkflowDefinitionDto> GetAsync(string id)
+        {
+            return _workflowDefinitionAppService.GetAsync(id);
+        }
 
         [HttpGet]
         public virtual Task<List<WorkflowDefinitionListDto>> GetListAsync()
         {
             return  _workflowDefinitionAppService.GetListAsync();
+        }
+        [HttpPut]
+        [Route("{id}")]
+        public virtual Task UpdateAsync(string id, WorkflowDefinitionUpdateDto input)
+        {
+            return _workflowDefinitionAppService.UpdateAsync(id, input);
         }
     }
 }

@@ -16,12 +16,11 @@ namespace Volo.Abp.WorkFlowManagement
 
             CreateMap<global::Elsa.Models.WorkflowInstance, WorkflowInstance>()
                 .ForMember(d => d.Id, d => d.Ignore())
-                .ForMember(d => d.Activities, d => d.ConvertUsing(new ActivityInstanceDictionaryConverter()))
-                .ForMember(d => d.InstanceId, d => d.MapFrom(s => s.Id));
-
+                .ForMember(d => d.BlockingActivities, d => d.Ignore())
+                .ForMember(d => d.Activities, d => d.Ignore());
             CreateMap<WorkflowInstance, global::Elsa.Models.WorkflowInstance>()
-                .ForMember(d => d.Activities, d => d.ConvertUsing(new ActivityInstanceEntityCollectionConverter()))
-                .ForMember(d => d.Id, d => d.MapFrom(s => s.InstanceId));
+                .ForMember(t=>t.CreatedAt,option=>option.MapFrom(s=>s.CreationTime))
+                .ForMember(d => d.Activities, d => d.ConvertUsing(new ActivityInstanceEntityCollectionConverter()));
 
             CreateMap<global::Elsa.Models.ActivityDefinition, ActivityDefinition>()
                 .ForMember(d => d.WorkflowDefinitionVersion, d => d.Ignore());
@@ -33,7 +32,8 @@ namespace Volo.Abp.WorkFlowManagement
                 .ForMember(d => d.ActivityId, d => d.MapFrom(s => s.Id))
                 .ForMember(d => d.WorkflowInstance, d => d.Ignore());
 
-            CreateMap<ActivityInstance, global::Elsa.Models.ActivityInstance>().ForMember(d => d.Id, d => d.MapFrom(s => s.ActivityId));
+            CreateMap<ActivityInstance, global::Elsa.Models.ActivityInstance>()
+                .ForMember(d => d.Id, d => d.MapFrom(s => s.ActivityId));
             CreateMap<global::Elsa.Models.BlockingActivity, BlockingActivity>()
                 .ForMember(d => d.WorkflowInstance, d => d.Ignore())
                 .ReverseMap();

@@ -32,7 +32,7 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
         {
             return DbContext.Set<ConnectionDefinition>()
                 .Include(t=>t.WorkflowDefinitionVersion)
-                .Where(t => t.WorkflowDefinitionVersion.DefinitionId == id)
+                .Where(t => t.WorkflowDefinitionVersion.Id == id)
                 .ToListAsync(cancellationToken);
         }
         
@@ -63,6 +63,13 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
                 .Where(t=>t.Id==id)
                 .WithVersion(version)
                 .ToListAsync(GetCancellationToken(cancellationToken));
+        }
+
+        public async Task<WorkflowDefinitionVersion> GetByIdAsync(string id, bool includeDetails = false, CancellationToken cancellationToken = default)
+        {
+            return await DbSet
+             .IncludeDetails(includeDetails)
+             .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
         }
     }
 }

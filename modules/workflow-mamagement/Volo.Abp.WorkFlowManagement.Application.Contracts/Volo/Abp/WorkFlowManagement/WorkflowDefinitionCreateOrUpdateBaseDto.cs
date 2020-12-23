@@ -1,20 +1,16 @@
-﻿using Elsa.Models;
+﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Volo.Abp.WorkFlowManagement
 {
-    public class WorkflowDefinitionDto
+   public class WorkflowDefinitionCreateOrUpdateBaseDto
     {
-        public int Version { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public Variables Variables { get; set; }
         public bool IsSingleton { get; set; }
         public bool IsDisabled { get; set; }
-        public bool IsPublished { get; set; } = false;
-        public bool IsLatest { get; set; }
-
-        public List<ActivityDto> Activities { get; set; }
         public List<ConnectionDto> Connections { get; set; }
+        public List<ActivityDto> Activities { get; set; }
     }
 }

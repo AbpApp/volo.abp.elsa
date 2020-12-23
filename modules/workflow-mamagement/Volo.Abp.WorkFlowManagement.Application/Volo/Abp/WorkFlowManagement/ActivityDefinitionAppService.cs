@@ -20,9 +20,9 @@ namespace Volo.Abp.WorkFlowManagement
         {
            return _activityManager.GetActivityDefinitionList().Select(item =>
             {
-                var dto = ObjectMapper.Map<ActivityDescriptor, ActivityDescriptorDto>(item);
-                dto.Id = GuidGenerator.Create();
-                return dto;
+                var activityDto = ObjectMapper.Map<ActivityDescriptor, ActivityDescriptorDto>(item);
+                activityDto.Id = GuidGenerator.Create();
+                return activityDto;
             }).ToList();
         }
     }

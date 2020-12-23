@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Elsa.Extensions;
 using Elsa.Models;
 using Elsa.Persistence;
+using Volo.Abp.Guids;
 using Volo.Abp.ObjectMapping;
 using Volo.Abp.Uow;
 
@@ -18,13 +19,16 @@ namespace Volo.Abp.WorkFlowManagement
         private readonly IObjectMapper<WorkFlowManagementDomainModule> _objectMapper;
         private readonly IActivityDefinitionRepository _activityDefinitionRepository;
         private readonly IActivityInstanceRepository _activityInstanceRepository;
-        public DatabaseWorkflowInstanceStore(IWorkflowInstanceRepository workflowInstanceRepository, IObjectMapper<WorkFlowManagementDomainModule> objectMapper, IActivityDefinitionRepository activityDefinitionRepository, IActivityInstanceRepository activityInstanceRepository, IUnitOfWorkManager unitOfWorkManager)
+        private readonly IGuidGenerator _guidGenerator;
+
+        public DatabaseWorkflowInstanceStore(IWorkflowInstanceRepository workflowInstanceRepository, IObjectMapper<WorkFlowManagementDomainModule> objectMapper, IActivityDefinitionRepository activityDefinitionRepository, IActivityInstanceRepository activityInstanceRepository, IUnitOfWorkManager unitOfWorkManager, IGuidGenerator guidGenerator)
         {
             this._workflowInstanceRepository = workflowInstanceRepository;
             _objectMapper = objectMapper;
             _activityDefinitionRepository = activityDefinitionRepository;
             _activityInstanceRepository = activityInstanceRepository;
             _unitOfWorkManager = unitOfWorkManager;
+            _guidGenerator = guidGenerator;
         }
 
         public async Task<global::Elsa.Models.WorkflowInstance> SaveAsync(global::Elsa.Models.WorkflowInstance instance, CancellationToken cancellationToken = default)
@@ -33,11 +37,29 @@ namespace Volo.Abp.WorkFlowManagement
                 .GetByInstanceIdAsync(instance.Id, true,cancellationToken);
             if (existingEntity == null)
             {
-                var entity = Map(instance);
-                await _workflowInstanceRepository.InsertAsync(entity, true, cancellationToken);
+                var workflowInstance = new WorkflowInstance(_guidGenerator.Create().ToString());
+                _objectMapper.Map(instance, workflowInstance);
+                workflowInstance.Activities = instance.Activities
+                    .Select(t =>
+                        new ActivityInstance(_guidGenerator.Create().ToString())
+                        {
+                            Type = t.Value.Type,
+                            ActivityId = t.Key,
+                            State = t.Value.State,
+                            Output = t.Value.Output,
+                        }
+                    ).ToList();
+                workflowInstance.BlockingActivities = instance.BlockingActivities.Select(t=>
+                    new BlockingActivity(_guidGenerator.Create().ToString())
+                    {
+                        ActivityId = t.ActivityId,
+                        ActivityType =t.ActivityType
+                    }).ToList();
+                    
+                await _workflowInstanceRepository.InsertAsync(workflowInstance, cancellationToken: cancellationToken);
                 await _unitOfWorkManager.Current.SaveChangesAsync(cancellationToken);
 
-                return Map(entity);
+                return Map(workflowInstance);
             }
             else
             {
@@ -52,7 +74,7 @@ namespace Volo.Abp.WorkFlowManagement
                 return Map(entity);
             }
         }
-
+        
         public async Task<global::Elsa.Models.WorkflowInstance> GetByIdAsync(string id, CancellationToken cancellationToken = default)
         {
             var existingEntity = await _workflowInstanceRepository

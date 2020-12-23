@@ -43,13 +43,13 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
         {
             return await DbContext.Set<BlockingActivity>()
                 .Include(t=>t.WorkflowInstance)
-                .Where(t => t.WorkflowInstance.InstanceId == id)
+                .Where(t => t.WorkflowInstance.Id == id)
                 .ToListAsync(cancellationToken);
         }
 
         public async Task<WorkflowInstance> GetByInstanceIdAsync(string instanceId,  bool includeDetails = false,CancellationToken cancellationToken = default)
         {
-            return await DbSet.IncludeDetails(includeDetails).FirstOrDefaultAsync(t => t.InstanceId == instanceId,cancellationToken);
+            return await DbSet.IncludeDetails(includeDetails).FirstOrDefaultAsync(t => t.Id == instanceId,cancellationToken);
         }
 
         public async Task<List<WorkflowInstance>> GetListByBlockingActivityAsync(string activityType, string correlationId = null, WorkflowStatus status = WorkflowStatus.Executing,  bool includeDetails = false,CancellationToken cancellationToken = default)

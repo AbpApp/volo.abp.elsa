@@ -33,14 +33,13 @@ namespace Volo.Abp.WorkFlowManagement
             Connections = new List<ConnectionDefinition>();
             Variables = new Variables();
         }
-        public string DefinitionId { get; set; }
         public int Version { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public Variables Variables { get; set; }
         public bool IsSingleton { get; set; }
         public bool IsDisabled { get; set; }
-        public bool IsPublished { get; set; }
+        public bool IsPublished { get; set; } = false;
         public bool IsLatest { get; set; }
         public ICollection<ActivityDefinition> Activities { get; set; }
         public ICollection<ConnectionDefinition> Connections { get; set; }

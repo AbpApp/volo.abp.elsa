@@ -26,7 +26,7 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
         {
             return DbSet
                 .Include(t=>t.WorkflowDefinitionVersion)
-                .Where(t => t.WorkflowDefinitionVersion.DefinitionId == id)
+                .Where(t => t.WorkflowDefinitionVersion.Id == id)
                 .ToListAsync(cancellationToken);
         }
     }

@@ -14,10 +14,6 @@ namespace Volo.Abp.WorkFlowManagement
         public int Left { get; set; }
         public int Top { get; set; }
         public Dictionary<string,object> State { get; set; }
-        public bool Blocking { get; set; }
-        public bool Executed { get; set; }
-        public bool Faulted { get; set; }
         
-        public ActivityMessageDto Message { get; set; }
     }
 }

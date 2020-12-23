@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Volo.Abp.WorkFlowManagement
 {
-    public class WorkflowDefinitionCreateDto: WorkflowDefinitionCreateOrUpdateBaseDto
+   public class WorkflowDefinitionUpdateDto : WorkflowDefinitionCreateOrUpdateBaseDto
     {
 
     }

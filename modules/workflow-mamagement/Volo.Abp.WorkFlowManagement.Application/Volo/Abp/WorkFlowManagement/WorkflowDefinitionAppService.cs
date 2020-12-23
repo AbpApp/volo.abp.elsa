@@ -4,19 +4,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Elsa.Extensions;
-using Elsa.Serialization;
 using ElsaWorkflowDefinitionVersion = Elsa.Models.WorkflowDefinitionVersion;
 namespace Volo.Abp.WorkFlowManagement
 {
     public class WorkflowDefinitionAppService : WorkFlowManagementAppService, IWorkflowDefinitionAppService
     {
         private readonly IWorkflowDefinitionStore _workflowDefinitionStore;
+        private readonly IWorkflowDefinitionVersionRepository _workflowDefinitionVersionRepository;
         private readonly IWorkflowInstanceStore _workflowInstanceStore;
-        private readonly IWorkflowDefinitionStore _store;
-        public WorkflowDefinitionAppService(IWorkflowDefinitionStore workflowDefinitionStore,  IWorkflowDefinitionStore store, IWorkflowInstanceStore workflowInstanceStore)
+        public WorkflowDefinitionAppService(IWorkflowDefinitionStore workflowDefinitionStore, IWorkflowInstanceStore workflowInstanceStore, IWorkflowDefinitionVersionRepository workflowDefinitionVersionRepository)
         {
             _workflowDefinitionStore = workflowDefinitionStore;
-            _store = store;
+            _workflowDefinitionVersionRepository = workflowDefinitionVersionRepository;
             _workflowInstanceStore = workflowInstanceStore;
         }
 
@@ -34,32 +33,20 @@ namespace Volo.Abp.WorkFlowManagement
                     x.Left, x.Top))
                 .ToList();       
             workflow.Connections = input.Connections.Select(
-                x => new ConnectionDefinition(x.SourceActivityId, x.DestinationActivityId, x.Outcome)).ToList();
-            var publishedDefinition = await _store.GetByIdAsync(
-                workflow.DefinitionId,
-                VersionOptions.Published);
-            
-            if (publishedDefinition != null)
-            {
-                publishedDefinition.IsPublished = false;
-                publishedDefinition.IsLatest = false;
-                await _store.UpdateAsync(publishedDefinition);
-            }
-            if (workflow.IsPublished)
-            {
-                workflow.Version++;
-            }
-            else
-            {
-                workflow.IsPublished = true;   
-            }
+                x => new ConnectionDefinition(GuidGenerator.Create().ToString(), x.SourceActivityId, x.DestinationActivityId, x.Outcome)).ToList();
             workflow.IsLatest = true;
-            await _store.SaveAsync(Map(workflow));
+            await _workflowDefinitionVersionRepository.InsertAsync(workflow);
         }
 
         public async Task DeleteAsync(string id)
         {
             await _workflowDefinitionStore.DeleteAsync(id);
+        }
+
+        public async Task<WorkflowDefinitionDto> GetAsync(string id)
+        {
+            var workflowDefinition = await _workflowDefinitionVersionRepository.GetByIdAsync(id,true);
+            return ObjectMapper.Map<WorkflowDefinitionVersion, WorkflowDefinitionDto>(workflowDefinition);
         }
 
         public  async Task<List<WorkflowDefinitionListDto>> GetListAsync()
@@ -77,6 +64,26 @@ namespace Volo.Abp.WorkFlowManagement
 
             return result;
         }
+
+        public async Task UpdateAsync(string id, WorkflowDefinitionUpdateDto input)
+        {
+            var workflowDefinition =await _workflowDefinitionVersionRepository.GetAsync(id);
+            if (workflowDefinition == null)
+                throw new UserFriendlyException("未找到工作流定义！");
+            workflowDefinition.Activities = input.Activities
+                .Select(x => new ActivityDefinition(x.Id, x.Type, x.State, x.Left, x.Top))
+                .ToList();
+
+            workflowDefinition.Connections = input.Connections.Select(
+                x => new ConnectionDefinition(GuidGenerator.Create().ToString(), x.SourceActivityId, x.DestinationActivityId, x.Outcome)).ToList();
+            workflowDefinition.Description = input.Description;
+            workflowDefinition.Name = input.Name;
+            workflowDefinition.IsDisabled = input.IsDisabled;
+            workflowDefinition.IsSingleton = input.IsSingleton;
+
+            await _workflowDefinitionVersionRepository.UpdateAsync(workflowDefinition);
+        }
+
         private async Task<WorkflowDefinitionListDto> CreateWorkflowDefinitionListItemModelAsync(
             ElsaWorkflowDefinitionVersion workflowDefinition)
         {

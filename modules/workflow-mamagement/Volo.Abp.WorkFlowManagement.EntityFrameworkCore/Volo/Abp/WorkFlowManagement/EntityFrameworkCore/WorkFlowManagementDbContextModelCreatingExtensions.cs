@@ -27,7 +27,6 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
             {
                 b.ToTable(options.TablePrefix + "WorkflowDefinitionVersions", options.Schema);
                 b.ConfigureFullAuditedAggregateRoot();
-                b.Property(x => x.DefinitionId);
                 b.HasMany(x => x.Activities).WithOne(x => x.WorkflowDefinitionVersion);
                 b.HasMany(x => x.Connections).WithOne(x => x.WorkflowDefinitionVersion);
                 b.Property(x => x.Variables).HasConversion(x => Serialize(x), x => Deserialize<Variables>(x));
@@ -81,10 +80,8 @@ namespace Volo.Abp.WorkFlowManagement.EntityFrameworkCore
             });
             builder.Entity<ConnectionDefinition>(b =>
             {
+                b.ConfigureByConvention();
                 b.ToTable(options.TablePrefix + "ConnectionDefinitions", options.Schema);
-                b.HasKey(c => new { c.DestinationActivityId, c.SourceActivityId });
-                b.HasIndex(c => new  { c.DestinationActivityId, c.SourceActivityId });
-
             });
             builder.Entity<ActivityInstance>(b =>
             {

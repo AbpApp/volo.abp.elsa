@@ -20,7 +20,7 @@ namespace Volo.Abp.Elsa
         public override void ConfigureServices(ServiceConfigurationContext context)
         {
             context.Services.AddSingleton<IActivityManager, ActivityManager>();
-
+            context.Services.AddScoped<IActivityInvoker, ActivityInvoker>();
         }
         public override void PreConfigureServices(ServiceConfigurationContext context)
         {

@@ -13,19 +13,21 @@ using Elsa.Services.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using NodaTime;
+using Volo.Abp.EventBus.Distributed;
 
 namespace Volo.Abp.Elsa
 {
    public class WorkFlowInvoker: IWorkflowInvoker
     {
-        private readonly IActivityInvoker activityInvoker;
-        private readonly IWorkflowFactory workflowFactory;
-        private readonly IWorkflowRegistry workflowRegistry;
-        private readonly IWorkflowInstanceStore workflowInstanceStore;
-        private readonly IEnumerable<IWorkflowEventHandler> workflowEventHandlers;
-        private readonly IClock clock;
-        private readonly IServiceProvider serviceProvider;
-        private readonly ILogger<WorkFlowInvoker> logger;
+        private readonly IActivityInvoker _activityInvoker;
+        private readonly IWorkflowFactory _workflowFactory;
+        private readonly IWorkflowRegistry _workflowRegistry;
+        private readonly IWorkflowInstanceStore _workflowInstanceStore;
+        private readonly IEnumerable<IWorkflowEventHandler> _workflowEventHandlers;
+        private readonly IClock _clock;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<WorkFlowInvoker> _logger;
+        private readonly IDistributedEventBus _distributedEventBus;
 
         public WorkFlowInvoker(
             IActivityInvoker activityInvoker,
@@ -35,16 +37,17 @@ namespace Volo.Abp.Elsa
             IEnumerable<IWorkflowEventHandler> workflowEventHandlers,
             IClock clock,
             IServiceProvider serviceProvider,
-            ILogger<WorkFlowInvoker> logger)
+            ILogger<WorkFlowInvoker> logger, IDistributedEventBus distributedEventBus)
         {
-            this.activityInvoker = activityInvoker;
-            this.workflowFactory = workflowFactory;
-            this.workflowRegistry = workflowRegistry;
-            this.workflowInstanceStore = workflowInstanceStore;
-            this.workflowEventHandlers = workflowEventHandlers;
-            this.clock = clock;
-            this.serviceProvider = serviceProvider;
-            this.logger = logger;
+            _activityInvoker = activityInvoker;
+            _workflowFactory = workflowFactory;
+            _workflowRegistry = workflowRegistry;
+            _workflowInstanceStore = workflowInstanceStore;
+            _workflowEventHandlers = workflowEventHandlers;
+            _clock = clock;
+            _serviceProvider = serviceProvider;
+            _logger = logger;
+            _distributedEventBus = distributedEventBus;
         }
 
         public Task<WorkflowExecutionContext> StartAsync(
@@ -62,7 +65,7 @@ namespace Volo.Abp.Elsa
             string correlationId = default,
             CancellationToken cancellationToken = default)
         {
-            var workflow = workflowFactory.CreateWorkflow(workflowDefinition, input, correlationId: correlationId);
+            var workflow = _workflowFactory.CreateWorkflow(workflowDefinition, input, correlationId: correlationId);
             var startActivities = workflow.Activities.Find(startActivityIds);
 
             return ExecuteAsync(workflow, false, startActivities, cancellationToken);
@@ -74,7 +77,7 @@ namespace Volo.Abp.Elsa
             string correlationId = default,
             CancellationToken cancellationToken = default) where T : IWorkflow, new()
         {
-            var workflow = workflowFactory.CreateWorkflow<T>(input, correlationId: correlationId);
+            var workflow = _workflowFactory.CreateWorkflow<T>(input, correlationId: correlationId);
             var startActivities = workflow.Activities.Find(startActivityIds);
 
             return ExecuteAsync(workflow, false, startActivities, cancellationToken);
@@ -94,7 +97,7 @@ namespace Volo.Abp.Elsa
             IEnumerable<string> startActivityIds = default,
             CancellationToken cancellationToken = default) where T : IWorkflow, new()
         {
-            var workflow = workflowFactory.CreateWorkflow<T>(input, workflowInstance);
+            var workflow = _workflowFactory.CreateWorkflow<T>(input, workflowInstance);
             return ResumeAsync(workflow, startActivityIds, cancellationToken);
         }
 
@@ -104,12 +107,12 @@ namespace Volo.Abp.Elsa
             IEnumerable<string> startActivityIds = default,
             CancellationToken cancellationToken = default)
         {
-            var definition = await workflowRegistry.GetWorkflowDefinitionAsync(
+            var definition = await _workflowRegistry.GetWorkflowDefinitionAsync(
                 workflowInstance.DefinitionId,
                 VersionOptions.SpecificVersion(workflowInstance.Version),
                 cancellationToken);
 
-            var workflow = workflowFactory.CreateWorkflow(definition, input, workflowInstance);
+            var workflow = _workflowFactory.CreateWorkflow(definition, input, workflowInstance);
             return await ResumeAsync(workflow, startActivityIds, cancellationToken);
         }
 
@@ -118,6 +121,7 @@ namespace Volo.Abp.Elsa
             IEnumerable<string> startActivityIds = default,
             CancellationToken cancellationToken = default)
         {
+            
             startActivityIds ??= workflow.BlockingActivities.Select(x => x.Id);
             var startActivities = workflow.Activities.Find(startActivityIds);
             return ExecuteAsync(workflow, true, startActivities, cancellationToken);
@@ -156,7 +160,7 @@ namespace Volo.Abp.Elsa
             Func<JObject, bool> activityStatePredicate = default,
             CancellationToken cancellationToken = default)
         {
-            var workflowInstances = await workflowInstanceStore
+            var workflowInstances = await _workflowInstanceStore
                 .ListByBlockingActivityAsync(activityType, correlationId, cancellationToken)
                 .ToListAsync();
 
@@ -177,7 +181,7 @@ namespace Volo.Abp.Elsa
             Func<JObject, bool> activityStatePredicate = default,
             CancellationToken cancellationToken = default)
         {
-            var workflowDefinitions = await workflowRegistry.ListByStartActivityAsync(activityType, cancellationToken);
+            var workflowDefinitions = await _workflowRegistry.ListByStartActivityAsync(activityType, cancellationToken);
 
             if (activityStatePredicate != null)
                 workflowDefinitions = workflowDefinitions.Where(x => activityStatePredicate(x.Item2.State));
@@ -253,7 +257,7 @@ namespace Volo.Abp.Elsa
                     .Where(x => x.Id == activityDefinition.Id)
                     .Select(x => x.Id);
 
-                var workflow = workflowFactory.CreateWorkflow(workflowDefinition, input, correlationId: correlationId);
+                var workflow = _workflowFactory.CreateWorkflow(workflowDefinition, input, correlationId: correlationId);
 
                 var executionContext = await ExecuteAsync(
                     workflow,
@@ -279,13 +283,13 @@ namespace Volo.Abp.Elsa
             {
                 var workflowInstance = workflowInstanceGroup.Key;
 
-                var workflowDefinition = await workflowRegistry.GetWorkflowDefinitionAsync(
+                var workflowDefinition = await _workflowRegistry.GetWorkflowDefinitionAsync(
                     workflowInstance.DefinitionId,
                     VersionOptions.SpecificVersion(workflowInstance.Version),
                     cancellationToken
                 );
 
-                var workflow = workflowFactory.CreateWorkflow(workflowDefinition, input, workflowInstance);
+                var workflow = _workflowFactory.CreateWorkflow(workflowDefinition, input, workflowInstance);
 
                 foreach (var activity in workflowInstanceGroup)
                 {
@@ -315,9 +319,9 @@ namespace Volo.Abp.Elsa
             else
             {
                 // Notify event handlers that halting activities are about to be executed.
-                await workflowEventHandlers.InvokeAsync(
+                await _workflowEventHandlers.InvokeAsync(
                     async x => await x.InvokingHaltedActivitiesAsync(workflowExecutionContext, cancellationToken),
-                    logger
+                    _logger
                 );
 
                 // Invoke Halted event on activity drivers that halted the workflow.
@@ -335,9 +339,9 @@ namespace Volo.Abp.Elsa
             }
 
             // Notify event handlers that workflow execution has ended.
-            await workflowEventHandlers.InvokeAsync(
+            await _workflowEventHandlers.InvokeAsync(
                 async x => await x.WorkflowInvokedAsync(workflowExecutionContext, cancellationToken),
-                logger
+                _logger
             );
         }
 
@@ -349,7 +353,7 @@ namespace Volo.Abp.Elsa
             return await InvokeActivityAsync(
                 workflowContext,
                 activity,
-                async () => await activityInvoker.ExecuteAsync(workflowContext, activity, cancellationToken),
+                async () => await _activityInvoker.ExecuteAsync(workflowContext, activity, cancellationToken),
                 cancellationToken
             );
         }
@@ -362,7 +366,7 @@ namespace Volo.Abp.Elsa
             return await InvokeActivityAsync(
                 workflowContext,
                 activity,
-                async () => await activityInvoker.ResumeAsync(workflowContext, activity, cancellationToken),
+                async () => await _activityInvoker.ResumeAsync(workflowContext, activity, cancellationToken),
                 cancellationToken
             );
         }
@@ -378,7 +382,7 @@ namespace Volo.Abp.Elsa
                 if (cancellationToken.IsCancellationRequested)
                 {
                     workflowContext.Workflow.Status = WorkflowStatus.Aborted;
-                    workflowContext.Workflow.FinishedAt = clock.GetCurrentInstant();
+                    workflowContext.Workflow.FinishedAt = _clock.GetCurrentInstant();
                     return null;
                 }
 
@@ -400,14 +404,14 @@ namespace Volo.Abp.Elsa
             return await InvokeActivityAsync(
                 workflowContext,
                 activity,
-                async () => await activityInvoker.HaltedAsync(workflowContext, activity, cancellationToken),
+                async () => await _activityInvoker.HaltedAsync(workflowContext, activity, cancellationToken),
                 cancellationToken
             );
         }
 
         private void FaultWorkflow(WorkflowExecutionContext workflowContext, IActivity activity, Exception ex)
         {
-            logger.LogError(
+            _logger.LogError(
                 ex,
                 "An unhandled error occurred while executing an activity. Putting the workflow in the faulted state."
             );
@@ -419,7 +423,7 @@ namespace Volo.Abp.Elsa
             IEnumerable<IActivity> startActivities,
             CancellationToken cancellationToken)
         {
-            var workflowExecutionContext = new WorkflowExecutionContext(workflow, clock, serviceProvider);
+            var workflowExecutionContext = new WorkflowExecutionContext(workflow, _clock, _serviceProvider);
             var startActivityList = startActivities?.ToList() ?? workflow.GetStartActivities().Take(1).ToList();
 
             foreach (var startActivity in startActivityList)
@@ -450,7 +454,7 @@ namespace Volo.Abp.Elsa
 
             foreach (var definition in singletons)
             {
-                var instances = await workflowInstanceStore.ListByStatusAsync(
+                var instances = await _workflowInstanceStore.ListByStatusAsync(
                     definition.Item1.DefinitionId,
                     WorkflowStatus.Executing,
                     cancellationToken

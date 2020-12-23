@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Volo.Abp.Application.Dtos;
 
 namespace Volo.Abp.WorkFlowManagement
 {
-    public class WorkflowDefinitionCreateDto: WorkflowDefinitionCreateOrUpdateBaseDto
+   public class GetWorkflowDefinitionInput:PagedResultRequestDto
     {
-
+        
     }
 }

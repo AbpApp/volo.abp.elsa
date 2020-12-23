@@ -18,6 +18,7 @@
     <PackageReference Include="Elsa.Core" Version="1.5.0" />
     <PackageReference Include="Elsa.Scripting.JavaScript" Version="1.5.0" />
     <PackageReference Include="Elsa.Scripting.Liquid" Version="1.5.0" />
+    <PackageReference Include="Volo.Abp.EventBus" Version="4.0.2" />
     <PackageReference Include="Volo.Abp.Guids" Version="4.0.2" />
     <PackageReference Include="Volo.Abp.Timing" Version="4.0.2" />
   </ItemGroup>

@@ -12,6 +12,16 @@ namespace Volo.Abp.WorkFlowManagement
              * into multiple profile classes for a better organization. */
             CreateMap<ActivityDescriptor, ActivityDescriptorDto>()
                 .ForMember(t=>t.Id,option=>option.Ignore());
+            CreateMap<WorkflowDefinitionVersion, WorkflowDefinitionDto>();
+            CreateMap<ActivityDefinition, ActivityDto>();
+            CreateMap<ConnectionDefinition, ConnectionDto>();
+            CreateMap<ActivityInstance, ActivityInstanceDto>();
+            CreateMap<ActivityInstance, ActivityInstanceListDto>();
+            CreateMap<BlockingActivity, BlockingActivityDto>();
+            CreateMap<BlockingActivity, BlockingActivityListDto>();
+            CreateMap<WorkflowInstance, WorkflowInstanceDto>();
+            CreateMap<WorkflowInstance, WorkflowInstanceListDto>();
+            CreateMap<ConnectionDefinition, ConnectionDto>();
         }
     }
 }
